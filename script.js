@@ -9,6 +9,17 @@ function createCustomElement(element, className, innerText) {
   const e = document.createElement(element);
   e.className = className;
   e.innerText = innerText;
+  if (element === 'button') {
+    e.addEventListener('click', () => {
+      const id = e.parentNode.firstChild.innerText;
+      const url = `https://api.mercadolibre.com/items/${id}`;
+      fetch(url)
+      .then((val) => val.json())
+      .then((value3) => createCartItemElement({ sku: value3.id,
+        name: value3.title,
+        salePrice: value3.price }));
+    });
+  }
   return e;
 }
 
@@ -20,8 +31,27 @@ function createProductItemElement({ sku, name, image }) {
   section.appendChild(createCustomElement('span', 'item__title', name));
   section.appendChild(createProductImageElement(image));
   section.appendChild(createCustomElement('button', 'item__add', 'Adicionar ao carrinho!'));
-
+  const itemSection = document.querySelector('.items');
+  itemSection.appendChild(section);
   return section;
+}
+
+function getAPI(api) {
+  const itens = api.results.reduce((acc, current) => {
+    acc.push({ sku: current.id,
+    name: current.title,
+    image: current.thumbnail });
+    return acc;
+  }, []);
+  return itens;
+}
+
+function product() {
+  const apiURL = 'https://api.mercadolibre.com/sites/MLB/search?q=computador';
+  fetch(apiURL)
+    .then((parameter) => parameter.json())
+    .then((value) => getAPI(value))
+    .then((val) => val.forEach((value2) => createProductItemElement(value2))); 
 }
 
 function getSkuFromProductItem(item) {
@@ -37,22 +67,11 @@ function createCartItemElement({ sku, name, salePrice }) {
   li.className = 'cart__item';
   li.innerText = `SKU: ${sku} | NAME: ${name} | PRICE: $${salePrice}`;
   li.addEventListener('click', cartItemClickListener);
+  const cart = document.querySelector('.cart__items');
+  cart.appendChild(li);
   return li;
 }
 
-const API = (QUERY) => {
-  fetch(`https://api.mercadolibre.com/sites/MLB/search?q=${QUERY}`)
-  .then((response) => response.json()).then((data) => {
-    const { results } = data;
-    return results;
-  })
-  .then((results) => results.forEach((result) => {
-    const createItems = document.querySelector('.items');
-    const { id: sku, title: name, thumbnail: image } = result;
-    const item = createProductItemElement({ sku, name, image });
-    createItems.appendChild(item);
-  }))
-  .catch((error) => console.log(error));
+window.onload = () => {
+  product();
 };
-
-window.onload = () => { API('computador'); };
