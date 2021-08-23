@@ -5,6 +5,29 @@ function createProductImageElement(imageSource) {
   return img;
 }
 
+function cartItemClickListener(event) {
+  let amount = 0;
+  const price = Number(event.target.innerText.split('$')[1]);
+  const cartPrice = document.querySelector('.total-price');
+  amount -= price;
+  cartPrice.innerText = amount;
+  event.target.remove();
+}
+
+function createCartItemElement({ sku, name, salePrice }) {
+  let amount = 0;
+  const cartPrice = document.querySelector('.total-price');
+  const list = document.createElement('list');
+  list.className = 'cart__item';
+  list.innerText = `SKU: ${sku} | NAME: ${name} | PRICE: $${salePrice}`;
+  list.addEventListener('click', cartItemClickListener);
+  const carrinho = document.querySelector('.cart__items');
+  carrinho.appendChild(list);
+  amount += salePrice;
+  cartPrice.innerText = amount;
+  return list;
+}
+
 function createCustomElement(element, className, innerText) {
   const e = document.createElement(element);
   e.className = className;
@@ -56,20 +79,6 @@ function product() {
 
 function getSkuFromProductItem(item) {
   return item.querySelector('span.item__sku').innerText;
-}
-
-function cartItemClickListener(event) {
-  // coloque seu código aqui
-}
-
-function createCartItemElement({ sku, name, salePrice }) {
-  const li = document.createElement('li');
-  li.className = 'cart__item';
-  li.innerText = `SKU: ${sku} | NAME: ${name} | PRICE: $${salePrice}`;
-  li.addEventListener('click', cartItemClickListener);
-  const cart = document.querySelector('.cart__items');
-  cart.appendChild(li);
-  return li;
 }
 
 window.onload = () => {
